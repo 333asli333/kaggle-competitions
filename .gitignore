@@ -1,0 +1,11 @@
+# Python / Jupyter
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Competition data (download from Kaggle, not redistributed here)
+**/dataset/
+**/submission.csv
+
+# macOS
+.DS_Store
