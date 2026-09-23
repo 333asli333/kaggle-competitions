@@ -2,107 +2,103 @@
 
 Kaggle competition: [Spaceship Titanic](https://www.kaggle.com/competitions/spaceship-titanic)
 
-**Soru:** uzay-zaman anomalisinde hangi yolcular başka bir boyuta taşındı ve bir model bunun nedenini öğrenebilir mi?
+**Question:** which passengers were transported to another dimension by the anomaly, and can a model learn why?
 
-| Notebook | Dil |
+| Notebook | Language |
 |---|---|
 | [`spaceship_titanic.ipynb`](spaceship_titanic.ipynb) | English |
 | [`spaceship_titanic_tr.ipynb`](spaceship_titanic_tr.ipynb) | Türkçe |
 
-## Hikâye
+## Story
 
-| Bölüm | Soru |
+| Chapter | Question |
 |---|---|
-| 1 | Veride ne var, eksikler nerede? |
-| 2 | Kim taşındı? |
-| 3 | Veri modele nasıl hazırlanır? |
-| 4 | Bulgular hangi özelliklere dönüşür? |
-| 5 | Hangi model daha iyi? |
-| 6 | Ayar ve birleştirme ne katıyor? |
-| 7 | Model nerede yanılıyor? |
+| 1 | What is in the data, and where are the gaps? |
+| 2 | Who was transported? |
+| 3 | How is the data prepared for a model? |
+| 4 | Which findings turn into features? |
+| 5 | Which model is better? |
+| 6 | What do tuning and ensembling add? |
+| 7 | Where does the model get it wrong? |
 
-## Ana bulgular
+## Key findings
 
-- **Uyku ve harcama en güçlü ipucu:** kapsülünde uyuyanların %82'si taşındı, gemide harcama yapanların %30'u.
-- **Harcamanın türü önemli:** oda servisi, spa ve VR güvertesinde 3000'den fazla harcayanlarda oran %5'e düşüyor. Yemek ve alışverişte ilişki U biçiminde.
-- **Konum belirleyici:** B ve C güverteleri %68–73, sağ taraf %56, sol taraf %45. Alt güvertelerde sağ taraftaki 600–1199 numaralı kabinlerde oran %71.
-- **Gezegen güverteyle iç içe:** Europa %66, Earth %42. Uyuyan Europa'lıların %99'u, uyuyan Earth'lülerin %66'sı taşındı.
-- **Küçük çocuklar farklı:** 0–4 yaş %77, yetişkinler %46–50.
-- **Grup kaderi paylaşılmıyor:** yalnızlar %45, gruptakiler %57; ama grupların yalnızca %43.6'sında tüm üyeler aynı sonucu yaşadı (rastgele karıştırmada %38.4).
-- **Eksik veriler rastgele:** eksik olan ve olmayan yolcuların taşınma oranları aynı.
+- **Sleep and spending are the strongest clue:** 82% of the passengers in cryosleep were transported, against 30% of those who spent money on board.
+- **The kind of spending matters:** among passengers spending more than 3000 on room service, spa and the VR deck the rate drops to 5%. For the food court and shopping mall the relation is U-shaped.
+- **Location decides:** decks B and C 68–73%, starboard side 56%, port side 45%. On the lower decks, starboard cabins 600–1199 reach 71%.
+- **Home planet is entangled with the deck:** Europa 66%, Earth 42%. Of the passengers in cryosleep, 99% of the Europans were transported but only 66% of the Earthlings.
+- **Young children are a group of their own:** 77% for ages 0–4, 46–50% for adults.
+- **Groups did not share a fate:** solo travellers 45%, group travellers 57%; yet in only 43.6% of groups did every member share the same outcome (38.4% with shuffled labels).
+- **Missingness is random:** passengers with and without missing values were transported at the same rate.
 
-## Yöntem
+## Method
 
-- **Kurallı eksik doldurma:** 12 kural, doğrulukları %73–100 (uyuyanın harcaması 0, soyadından gezegen, gruptan kabin). Kalan eksikler sızıntısız `Pipeline` içinde, yalnızca eğitim fold'undan öğrenilen istatistiklerle.
-- **CV:** StratifiedGroupKFold, 5 kat × 3 tekrar. Gruplar train ve test arasında bölünmediği için CV'de de bölünmüyor.
-- **Karşılaştırma:** tüm deneyler aynı 15 bölmede, farklar düzeltilmiş eşleştirilmiş t-testiyle (Nadeau & Bengio) kontrol edildi.
-- **Tuning:** Optuna, ayrı bir CV bölmesinde arama, bağımsız bölmelerde raporlama.
+- **Rule-based imputation:** 12 rules, 73–100% accurate (a sleeping passenger spends 0, the surname gives the home planet, the group gives the cabin). Remaining gaps are filled inside a leak-free `Pipeline`, with statistics learned from the training fold only.
+- **Cross-validation:** StratifiedGroupKFold, 5 folds × 3 repeats. Groups are never split between train and test on Kaggle, so they are not split in CV either.
+- **Comparison:** every experiment runs on the same 15 splits; differences are checked with the corrected paired t-test (Nadeau & Bengio).
+- **Tuning:** Optuna searches on a separate CV split and results are reported on independent splits.
 
-## Sonuç
+## Result
 
 | Model | CV accuracy | Kaggle public |
 |---|---|---|
-| Basit kural: hiç harcama yapmayan taşındı | 73.7% | – |
+| Simple rule: no spending means transported | 73.7% | – |
 | Logistic Regression | 79.9% | – |
-| HistGradientBoosting + harcama grupları | 81.3% | 0.80219 |
-| CatBoost, Optuna ile ayarlı | 81.6% | 0.80944 |
-| **Ensemble: 4 ayarlı gradient boosting** | **81.5%** | **0.81038** |
+| HistGradientBoosting + spending groups | 81.3% | 0.80219 |
+| CatBoost, tuned with Optuna | 81.6% | 0.80944 |
+| **Ensemble: 4 tuned gradient boosting models** | **81.5%** | **0.81038** |
 | Ensemble + `HotZone` | 81.5% | 0.80851 |
 
-## Öğrenilenler
+## What we learned
 
-- **Skoru modelin ayarı değil, modele verilen bilginin yeni olup olmadığı belirledi.** Kurallı doldurma (%73–100 doğru), Optuna araması, ensemble ve keşifte bulunan kabin bölgesi: hiçbiri skoru anlamlı ölçüde artırmadı. Tek işe yarayan özellik, harcamaları lüks ve temel diye ayırmak oldu.
-- **Ayar araması kendi CV'sinde +0.3 puan gösterdi, bağımsız bölmelerde bu kazanç kayboldu.** Aramayı ayrı bir bölmede yapmak bu yanılgıyı görünür kıldı.
-- **Hataların %76'sı Earth'lü yolcularda, özellikle G güvertesinde.** Bu yolcuların %52–66'sı taşınmış ve elimizdeki hiçbir bilgi onları birbirinden ayırmıyor.
+- **The score was decided by whether the information given to the model was new, not by how the model was tuned.** Rule-based imputation (73–100% accurate), the Optuna search, the ensemble and the cabin region found during exploration: none of them moved the score by a meaningful margin. The only feature that helped was splitting spending into luxury and basic services.
+- **The search showed +0.3 points on its own CV split, and that gain vanished on independent splits.** Searching on a separate split is what made the illusion visible.
+- **76% of the errors are Earthlings, mostly on deck G.** Between 52% and 66% of them were transported, and nothing in the data tells them apart.
 
-## Kurallar
+## Competition rules
 
-- **Görev / metrik:** ikili sınıflandırma, accuracy.
-- **Submission:** `PassengerId,Transported` (True/False), 4277 satır. Günde en fazla **10** submission.
-- **Leaderboard:** public / private test ayrımı gizli; iki aydan eski submission'lar düşer. Bitiş tarihi yok.
-- **Takım:** en fazla 10 kişi, tek hesap. Kod yalnızca takım içinde ya da herkese açık (forum / notebook) paylaşılabilir.
-- **Veri:** yeniden dağıtılamaz (repoya eklenmez). Dış veri serbest ama herkese açık ve ücretsiz olmalı. Test verisine elle etiket vermek yasak. AutoML serbest.
+- **Task / metric:** binary classification, accuracy.
+- **Submission:** `PassengerId,Transported` (True/False), 4277 rows. At most **10** submissions per day.
+- **Leaderboard:** the public / private split of the test set is hidden; submissions older than two months drop off. No end date.
+- **Teams:** at most 10 members, one account per participant. Code may be shared inside a team or publicly (forum / notebooks), never privately.
+- **Data:** not redistributable (kept out of this repository). External data is allowed if it is public and free for everyone. Hand-labelling the test data is forbidden. AutoML is allowed.
 
 ## Pipeline
 
-| # | Adım | İçerik | Durum |
+| # | Step | Contents | Status |
 |---|---|---|---|
-| 1 | Veriyi tanıma | Satır/sütun sayısı, sütun anlamları, veri tipleri ve tip dönüşümü, tekrar eden kayıtlar, eksik veriler (silmek mi doldurmak mı), temel istatistikler (ortalama, medyan, dağılım) | ✅ |
-| 2 | Keşifsel analiz | Her değişkenin hedefle ilişkisi: CryoSleep, harcamalar, kabin, grup/aile, gezegen, yaş | ✅ |
-| 3 | Ön işleme | Sütun ayrıştırma (`PassengerId`, `Cabin`, `Name`), kurallı eksik doldurma, kodlama, ölçekleme; tümü sızıntısız `Pipeline` içinde | ✅ |
-| 4 | Özellik mühendisliği | Grup büyüklüğü, toplam harcama, aile, kabin bölgesi | ✅ |
-| 5 | Modeller | LR, RF, HistGB, XGBoost, LightGBM, CatBoost; aynı fold'larda, istatistiksel karşılaştırma | ✅ |
-| 6 | Tuning ve ensemble | Optuna, blend / stacking | ✅ |
-| 7 | Submission ve hata analizi | CV'ye göre seçim, LB ile kontrol, `HotZone` denemesi | ✅ |
+| 1 | Knowing the data | Rows and columns, what each column means, data types and conversion, duplicate records, missing values (drop or fill?), basic statistics (mean, median, spread) | ✅ |
+| 2 | Exploratory analysis | Each variable against the target: CryoSleep, spending, cabin, group/family, home planet, age | ✅ |
+| 3 | Preprocessing | Splitting composite columns (`PassengerId`, `Cabin`, `Name`), rule-based imputation, encoding, scaling; all inside a leak-free `Pipeline` | ✅ |
+| 4 | Feature engineering | Group size, total spending, family, cabin region | ✅ |
+| 5 | Models | LR, RF, HistGB, XGBoost, LightGBM, CatBoost on identical folds, compared statistically | ✅ |
+| 6 | Tuning and ensembling | Optuna, blending / stacking | ✅ |
+| 7 | Submissions and error analysis | Selection by CV, checked against the leaderboard, the `HotZone` experiment | ✅ |
 
-Her adımın çıktıları birlikte yorumlanır, onaydan sonra bir sonraki adıma geçilir.
+## Experiment log
 
-## Deney günlüğü
-
-| # | Değişiklik | Accuracy | F1 | ROC AUC | Public LB |
+| # | Change | Accuracy | F1 | ROC AUC | Public LB |
 |---|---|---|---|---|---|
-| 1 | Logistic Regression, temel sütunlar, kurallı doldurma | 77.81 ± 0.84 | 78.26 | 85.30 | |
-| 2 | HistGradientBoosting, temel sütunlar, kuralsız | 80.85 ± 0.63 | 80.98 | 90.03 | |
-| 3 | HistGradientBoosting, temel sütunlar, kurallı doldurma | 80.75 ± 0.81 | 80.89 | 90.22 | |
-| 4 | HistGB + harcama grupları → `01_hgb_spend_groups.csv` | 81.26 ± 0.81 | 81.41 | 90.49 | 80.22 |
-| 5 | HistGB + tüm yeni özellikler | 81.14 ± 0.64 | 81.25 | 90.51 | |
-| 6 | Logistic Regression + tüm yeni özellikler | 79.89 ± 0.91 | 80.29 | 86.87 | |
-| 7 | Random Forest + tüm özellikler | 80.69 ± 0.62 | 80.63 | 89.90 | |
-| 8 | XGBoost + tüm özellikler | 81.07 ± 0.52 | 81.21 | 90.50 | |
-| 9 | LightGBM + tüm özellikler | 81.23 ± 0.69 | 81.20 | 90.47 | |
-| 10 | CatBoost + tüm özellikler | 81.53 ± 0.90 | 81.77 | 90.84 | |
-| 11 | CatBoost, Optuna ile ayarlı → `02_catboost_tuned.csv` | 81.59 ± 0.80 | 81.85 | 90.83 | 80.94 |
-| 12 | LightGBM / HistGB / XGBoost, ayarlı | 81.16–81.32 | 81.55–81.68 | 90.49–90.68 | |
-| 13 | Ensemble: 4 ayarlı boosting ortalaması → `03_ensemble_4_boosting.csv` | 81.51 ± 0.78 | 81.83 | 90.81 | **81.04** |
-| 14 | Ensemble + `HotZone` (F/G, sağ taraf, 600–1199) → `04_ensemble_hotzone.csv` | 81.54 ± 0.73 | 81.85 | 90.86 | 80.85 |
+| 1 | Logistic Regression, base columns, rule-based filling | 77.81 ± 0.84 | 78.26 | 85.30 | |
+| 2 | HistGradientBoosting, base columns, no rules | 80.85 ± 0.63 | 80.98 | 90.03 | |
+| 3 | HistGradientBoosting, base columns, rule-based filling | 80.75 ± 0.81 | 80.89 | 90.22 | |
+| 4 | HistGB + spending groups → `01_hgb_spend_groups.csv` | 81.26 ± 0.81 | 81.41 | 90.49 | 80.22 |
+| 5 | HistGB + all new features | 81.14 ± 0.64 | 81.25 | 90.51 | |
+| 6 | Logistic Regression + all new features | 79.89 ± 0.91 | 80.29 | 86.87 | |
+| 7 | Random Forest + all features | 80.69 ± 0.62 | 80.63 | 89.90 | |
+| 8 | XGBoost + all features | 81.07 ± 0.52 | 81.21 | 90.50 | |
+| 9 | LightGBM + all features | 81.23 ± 0.69 | 81.20 | 90.47 | |
+| 10 | CatBoost + all features | 81.53 ± 0.90 | 81.77 | 90.84 | |
+| 11 | CatBoost, tuned with Optuna → `02_catboost_tuned.csv` | 81.59 ± 0.80 | 81.85 | 90.83 | 80.94 |
+| 12 | LightGBM / HistGB / XGBoost, tuned | 81.16–81.32 | 81.55–81.68 | 90.49–90.68 | |
+| 13 | Ensemble: average of 4 tuned boosting models → `03_ensemble_4_boosting.csv` | 81.51 ± 0.78 | 81.83 | 90.81 | **81.04** |
+| 14 | Ensemble + `HotZone` (decks F/G, starboard, 600–1199) → `04_ensemble_hotzone.csv` | 81.54 ± 0.73 | 81.85 | 90.86 | 80.85 |
 
-Optuna ayarları `tuning/best_params.json` içinde; notebook aramayı yeniden çalıştırmadan bunları okuyor.
+CV: StratifiedGroupKFold, 5 folds × 3 repeats. The Optuna settings live in `tuning/best_params.json`; the notebook reads them instead of running the search again.
 
-CV: StratifiedGroupKFold, 5 kat × 3 tekrar.
+## Run
 
-## Çalıştırma
-
-Veriyi yarışma sayfasından `dataset/` altına indir (`train.csv`, `test.csv`, `sample_submission.csv`).
+Download the competition data into `dataset/` (`train.csv`, `test.csv`, `sample_submission.csv`). On Kaggle the notebook finds the data under `/kaggle/input` automatically.
 
 ```bash
 python3 -m venv .venv
@@ -111,7 +107,7 @@ pip install -r requirements.txt
 jupyter notebook spaceship_titanic.ipynb
 ```
 
-macOS'ta XGBoost ve LightGBM için OpenMP gerekir (`brew install libomp`). Homebrew yoksa scikit-learn'ün paketlediği kütüphane bağlanabilir:
+On macOS, XGBoost and LightGBM need the OpenMP runtime (`brew install libomp`). Without Homebrew, the copy shipped inside scikit-learn can be linked instead:
 
 ```bash
 SP=.venv/lib/python3.9/site-packages
