@@ -5,6 +5,7 @@ My notebooks for [Kaggle](https://www.kaggle.com/competitions) competitions. Eac
 | Competition | Task | Approach | CV accuracy | Kaggle public score |
 |---|---|---|---|---|
 | [Titanic](titanic/) | Binary classification | Logistic Regression, nested CV, statistical model comparison | 83.1% | 0.76794 |
+| [Spaceship Titanic](spaceship-titanic/) | Binary classification | Rule-based imputation, leak-free pipeline, Optuna tuning, ensemble of four gradient boosting models | 81.5% | 0.81038 |
 
 ## Principles
 

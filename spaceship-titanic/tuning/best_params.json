@@ -1,0 +1,57 @@
+{
+  "CatBoost": {
+    "params": {
+      "iterations": 1500,
+      "learning_rate": 0.01728104370203627,
+      "depth": 6,
+      "l2_leaf_reg": 9.90038502209085,
+      "random_strength": 0.6985420429128288,
+      "bagging_temperature": 0.21641205996520624
+    },
+    "tune_cv": 0.8178236788247858,
+    "trials": 50,
+    "minutes": 15.1
+  },
+  "LightGBM": {
+    "params": {
+      "n_estimators": 650,
+      "learning_rate": 0.03920810553451383,
+      "num_leaves": 9,
+      "min_child_samples": 15,
+      "subsample": 0.9052471815672409,
+      "colsample_bytree": 0.6977646088109104,
+      "reg_lambda": 0.006190178538792594
+    },
+    "tune_cv": 0.8137139894834439,
+    "trials": 53,
+    "minutes": 11.7
+  },
+  "XGBoost": {
+    "params": {
+      "n_estimators": 450,
+      "learning_rate": 0.02309283878935133,
+      "max_depth": 5,
+      "min_child_weight": 3.1119748295109364,
+      "subsample": 0.9925953601417935,
+      "colsample_bytree": 0.6029960075584144,
+      "reg_lambda": 0.01860095193479299,
+      "gamma": 2.0912920270704465
+    },
+    "tune_cv": 0.8154682783355813,
+    "trials": 200,
+    "minutes": 9.6
+  },
+  "HistGradientBoosting": {
+    "params": {
+      "max_iter": 350,
+      "learning_rate": 0.017314530172608075,
+      "max_leaf_nodes": 27,
+      "min_samples_leaf": 9,
+      "l2_regularization": 0.10834765339309348,
+      "max_features": 0.3447070334200856
+    },
+    "tune_cv": 0.8159808702277556,
+    "trials": 28,
+    "minutes": 10.2
+  }
+}
